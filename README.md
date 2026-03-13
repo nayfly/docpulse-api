@@ -1,4 +1,9 @@
 # DocPulse API
+ 
+![Python](https://img.shields.io/badge/python-3.12-blue)
+![Django](https://img.shields.io/badge/django-5.0-green)
+![Celery](https://img.shields.io/badge/celery-5.4-brightgreen)
+![Docker](https://img.shields.io/badge/docker-compose-blue)
 
 **Async Document Intelligence API** — upload documents, get AI-powered summaries, extract structured data, and query documents via natural language.
 
