@@ -2,6 +2,14 @@ import logging
 from celery import shared_task
 from django.utils import timezone
 
+from apps.documents.models import Document
+from apps.documents.services import (
+    analyze_document,
+    deliver_webhook,
+    download_file_from_s3,
+    extract_text,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -12,14 +20,6 @@ logger = logging.getLogger(__name__)
     name="documents.process_document",
 )
 def process_document(self, document_id: str):
-    from apps.documents.models import Document
-    from apps.documents.services import (
-        download_file_from_s3,
-        extract_text,
-        analyze_document,
-        deliver_webhook,
-    )
-
     try:
         doc = Document.objects.get(id=document_id)
     except Document.DoesNotExist:
@@ -27,7 +27,7 @@ def process_document(self, document_id: str):
         return
 
     doc.status = Document.Status.PROCESSING
-    doc.task_id = self.request.id
+    doc.task_id = self.request.id or doc.task_id or ""
     doc.save(update_fields=["status", "task_id", "updated_at"])
 
     try:

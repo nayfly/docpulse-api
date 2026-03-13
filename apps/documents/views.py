@@ -17,7 +17,7 @@ from .serializers import (
     DocumentStatusSerializer,
     DocumentUploadSerializer,
 )
-from .services import upload_file_to_s3
+from .services import answer_question, upload_file_to_s3
 from .tasks import process_document
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class DocumentUploadView(APIView):
 
         doc = Document.objects.create(
             owner=request.user,
-            name=file.name,
+            name=serializer.validated_data["name"],
             s3_key=s3_key,
             file_size=file.size,
             mime_type=file.content_type,
@@ -111,7 +111,6 @@ class DocumentAskView(APIView):
 
         cache_key = f"docpulse:qa:{hashlib.md5(f'{doc.id}{question}'.encode()).hexdigest()}"
 
-        from .services import answer_question
         answer = answer_question(doc.raw_text, question, cache_key=cache_key)
 
         return Response({"question": question, "answer": answer})

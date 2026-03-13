@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Document
+from .services import get_presigned_url
 
 
 class DocumentUploadSerializer(serializers.ModelSerializer):
@@ -51,7 +52,6 @@ class DocumentDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_download_url(self, obj):
-        from apps.documents.services import get_presigned_url
         try:
             return get_presigned_url(obj.s3_key)
         except Exception:
