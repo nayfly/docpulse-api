@@ -7,7 +7,7 @@
 
 **Async Document Intelligence API** — upload documents, get AI-powered summaries, extract structured data, and query documents via natural language.
 
-Built with Django 5, DRF, Celery, Redis, MinIO, and Claude (Anthropic).
+Built with Django 5, DRF, Celery, Redis, MinIO, and Ollama.
 
 ---
 
@@ -20,8 +20,8 @@ Client → POST /api/documents/ → Django API → MinIO (store file)
                                               ↓
                                            Celery Worker
                                               → MinIO (download file)
-                                              → Extract text (PyPDF2)
-                                              → Claude API (analyze)
+                                              → Extract text (pypdf)
+                                              → Ollama (analyze)
                                               → PostgreSQL (save results)
                                               → Webhook (notify client)
 ```
@@ -35,7 +35,7 @@ Client → POST /api/documents/ → Django API → MinIO (store file)
 | Async tasks | Celery + Redis |
 | Database | PostgreSQL |
 | File storage | MinIO (S3-compatible) |
-| AI | Anthropic Claude |
+| AI | Ollama (llama3.1:8b) — swappable |
 | Monitoring | Flower |
 | Containers | Docker + docker-compose |
 | Tests | pytest-django |
@@ -48,7 +48,8 @@ Client → POST /api/documents/ → Django API → MinIO (store file)
 git clone https://github.com/nayfly/docpulse-api
 cd docpulse-api
 cp .env.example .env
-# Add your ANTHROPIC_API_KEY to .env
+# Requires Ollama running locally with llama3.1:8b
+# ollama pull llama3.1:8b
 
 docker compose up --build
 docker compose exec api python manage.py migrate
@@ -121,6 +122,6 @@ docker compose exec api pytest --cov=apps --cov-report=term-missing
 
 - **Fail-closed retries**: Tasks retry 3x with 60s delay; on exhaustion → `failed` (never stuck in `processing`)
 - **Thin views, fat services**: Business logic in `services.py`, views and tasks stay thin and testable
-- **Redis Q&A cache**: Same question on same document hits cache, not Claude API
+- **Redis Q&A cache**: Same question on same document hits cache, not Ollama
 - **Presigned URLs**: Files never served through Django — MinIO generates short-lived URLs
 - **Signed webhooks**: HMAC-SHA256 signature for payload verification
