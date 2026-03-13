@@ -72,6 +72,15 @@ class TestLogin:
         }, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
+    def test_login_inactive_user(self, api_client, user):
+        user.is_active = False
+        user.save(update_fields=["is_active"])
+        response = api_client.post("/api/auth/login/", {
+            "email": "test@example.com",
+            "password": "testpass123",
+        }, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
 
 @pytest.mark.django_db
 class TestLogout:
@@ -88,3 +97,13 @@ class TestLogout:
     def test_logout_requires_auth(self, api_client):
         response = api_client.post("/api/auth/logout/", {"refresh": "token"})
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_logout_invalid_token_returns_400(self, api_client, user):
+        from rest_framework_simplejwt.tokens import RefreshToken
+        refresh = RefreshToken.for_user(user)
+        api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {str(refresh.access_token)}")
+
+        response = api_client.post("/api/auth/logout/", {
+            "refresh": "not-a-real-token",
+        }, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST

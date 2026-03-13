@@ -180,6 +180,31 @@ class TestDocumentAsk:
         )
         assert response.status_code == status.HTTP_409_CONFLICT
 
+    def test_ask_missing_document_returns_404(self, auth_client):
+        response = auth_client.post(
+            "/api/documents/00000000-0000-0000-0000-000000000000/ask/",
+            {"question": "Anything?"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_ask_without_raw_text_returns_422(self, auth_client, user):
+        doc = Document.objects.create(
+            owner=user,
+            name="done-empty.pdf",
+            s3_key="documents/test/done-empty.pdf",
+            file_size=123,
+            mime_type="application/pdf",
+            status=Document.Status.DONE,
+            raw_text="",
+        )
+        response = auth_client.post(
+            f"/api/documents/{doc.id}/ask/",
+            {"question": "Anything?"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
     def test_ask_requires_question_field(self, auth_client, done_document):
         response = auth_client.post(
             f"/api/documents/{done_document.id}/ask/",
@@ -226,3 +251,7 @@ class TestDocumentReprocess:
     def test_reprocess_done_document_returns_409(self, auth_client, done_document):
         response = auth_client.post(f"/api/documents/{done_document.id}/reprocess/")
         assert response.status_code == status.HTTP_409_CONFLICT
+
+    def test_reprocess_missing_document_returns_404(self, auth_client):
+        response = auth_client.post("/api/documents/00000000-0000-0000-0000-000000000000/reprocess/")
+        assert response.status_code == status.HTTP_404_NOT_FOUND
