@@ -4,6 +4,7 @@
 ![Django](https://img.shields.io/badge/django-5.0-green)
 ![Celery](https://img.shields.io/badge/celery-5.4-brightgreen)
 ![Docker](https://img.shields.io/badge/docker-compose-blue)
+![CI](https://github.com/nayfly/docpulse-api/actions/workflows/ci.yml/badge.svg)
 
 **Async Document Intelligence API** — upload documents, get AI-powered summaries, extract structured data, and query documents via natural language.
 
