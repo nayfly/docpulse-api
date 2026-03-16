@@ -13,18 +13,20 @@ Built with Django 5, DRF, Celery, Redis, MinIO, and Ollama.
 
 ## Architecture
 
-```
-Client → POST /api/documents/ → Django API → MinIO (store file)
-                                           → PostgreSQL (create record)
-                                           → Redis (enqueue task)
-                                              ↓
-                                           Celery Worker
-                                              → MinIO (download file)
-                                              → Extract text (pypdf)
-                                              → Ollama (analyze)
-                                              → PostgreSQL (save results)
-                                              → Webhook (notify client)
-```
+[![DocPulse architecture diagram](./docpulse_architecture.svg)](./docpulse_architecture.svg?raw=1)
+
+Click the diagram to open the interactive SVG. Inside it, each node links to the
+relevant source file or docs section.
+
+Quick links:
+[Client](./README.md#api-reference) |
+[Django API](./apps/documents/views.py) |
+[PostgreSQL](./apps/documents/models.py) |
+[MinIO](./apps/documents/services.py) |
+[Redis](./config/settings.py) |
+[Celery worker](./apps/documents/tasks.py) |
+[Ollama](./apps/documents/services.py) |
+[Flower](./docker-compose.yml)
 
 ## Stack
 
